@@ -23,6 +23,8 @@ class Conv2d(torch.nn.Module):
             else:
                 kernel_size, padding = 2, 0
 
+            print(kernel_size, padding)
+
             self.conv = torch.nn.Conv2d(in_channels, out_channels, kernel_size=kernel_size, stride=1, padding=padding, bias=bias)
         elif down:
             if bilinear:
@@ -35,7 +37,8 @@ class Conv2d(torch.nn.Module):
         else:
             self.conv = torch.nn.Conv2d(in_channels, out_channels, kernel_size=kernel, stride=1, padding=0, bias=bias)
         ### END CODE HERE ##
- 
+        
+        print(self.conv)
     def forward(self, x):
         return self.conv(x)
 
