@@ -16,8 +16,8 @@ class Conv2d(torch.nn.Module):
         print(up)
         print(down)
         assert (up and down), 'up and down cannot be both True'
-        assert not (kernel and (up or down)), 'Cannot use kernel with up/down sampling'
-        assert kernel or up or down, 'Must use kernel or up or down sampling'
+        assert (kernel and (up or down)), 'Cannot use kernel with up/down sampling'
+        assert not (kernel or up or down), 'Must use kernel or up or down sampling'
         ### START CODE HERE ### (approx. 23 lines)
         if up:
             if pooling:
@@ -34,6 +34,8 @@ class Conv2d(torch.nn.Module):
                     )
             else:
                 self.conv = torch.nn.ConvTranspose2d(in_channels, out_channels, kernel_size=2, stride=2, padding=0, bias=bias)
+        else:
+            self.conv = torch.nn.Conv2d(in_channels, out_channels, kernel_size=kernel, stride=1, padding=0, bias=bias)
         ### END CODE HERE ##
  
     def forward(self, x):
