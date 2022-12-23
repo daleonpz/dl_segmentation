@@ -17,17 +17,15 @@ class Conv2d(torch.nn.Module):
         assert not (kernel and (up or down)), 'Cannot use kernel with up/down sampling'
         assert (kernel or up or down), 'Must use kernel or up or down sampling'
         ### START CODE HERE ### (approx. 23 lines)
-        if up:
-            if pooling:
+        if up==True:
+            if pooling==True:
                 kernel_size, padding = 3, 1
             else:
                 kernel_size, padding = 2, 0
 
-            print(kernel_size, padding)
-
             self.conv = torch.nn.Conv2d(in_channels, out_channels, kernel_size=kernel_size, stride=1, padding=padding, bias=bias)
-        elif down:
-            if bilinear:
+        elif down==True:
+            if bilinear==True:
                 self.conv = torch.nn.Sequential(
                     torch.nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True),
                     torch.nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=bias)
@@ -39,7 +37,7 @@ class Conv2d(torch.nn.Module):
         ### END CODE HERE ##
         
         print(self.conv)
+        print('----------------')
     def forward(self, x):
         return self.conv(x)
-
 
