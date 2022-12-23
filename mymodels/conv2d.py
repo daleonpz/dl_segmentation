@@ -16,6 +16,8 @@ class Conv2d(torch.nn.Module):
         print(up)
         print(down)
         print(up and down)
+        print( kernel and (up or down))
+        print( kernel or (up or down))
         assert not (up and down), 'up and down cannot be both True'
         assert not (kernel and (up or down)), 'Cannot use kernel with up/down sampling'
         assert (kernel or up or down), 'Must use kernel or up or down sampling'
