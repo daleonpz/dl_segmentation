@@ -1,7 +1,7 @@
 import torch
 
 class Conv2d(torch.nn.Module):
-    def __init__(self, in_channels, out_channels, kernel=3, bias=True,
+    def __init__(self, in_channels, out_channels, kernel=0, bias=True,
                     up=False, down=False, bilinear=False, pooling=False):
         """
         Args:
@@ -13,11 +13,6 @@ class Conv2d(torch.nn.Module):
         """
 
         super().__init__()
-        print(up)
-        print(down)
-        print(up and down)
-        print( kernel and (up or down))
-        print( kernel or (up or down))
         assert not (up and down), 'up and down cannot be both True'
         assert not (kernel and (up or down)), 'Cannot use kernel with up/down sampling'
         assert (kernel or up or down), 'Must use kernel or up or down sampling'
