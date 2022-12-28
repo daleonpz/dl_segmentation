@@ -1,6 +1,9 @@
+import logging
 import torch
 
 import mymodels.conv2d as mm 
+
+logger = logging.getLogger(__name__)
 
 class UNetBlock(torch.nn.Module):
     def __init__(self, in_channels, out_channels, kernel=0, up=False, down=False,
@@ -26,12 +29,15 @@ class UNetBlock(torch.nn.Module):
         )
  
         ### END CODE HERE ###
+
+        logger.debug("UNetBlock: model=%s", self.conv)
+
     def forward(self, x):
         ## START CODE HERE ## (approx. 6 line)
         residual = x
         x = self.conv(x)
-        print(f'x shape {x.shape}')
-        print(f'residual shape {residual.shape}')
+
+        logger.debug("UNetBlock: x.shape: %s, residual.shape: %s", x.shape, residual.shape)
         if residual.shape == x.shape:
             return x + residual
         ### END CODE HERE ###
