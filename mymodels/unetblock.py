@@ -1,5 +1,5 @@
 import torch
-from mymodels.conv2d import Conv2d
+import mymodels.conv2d as mm 
 
 class UNetBlock(torch.nn.Module):
     def __init__(self, in_channels, out_channels, kernel=0, up=False, down=False,
@@ -12,18 +12,31 @@ class UNetBlock(torch.nn.Module):
             up/down:            Whether the first convolution is in up- or down-sampling mode.
             dropout:            Dropout probability for dropout before the second conv.
         """
-        ### START CODE HERE ### (approx. 6 lines)
-        self.conv1 = Conv2d(in_channels, 64, down=True, pooling=True)
-#         self.dropout = torch.nn.Dropout(dropout)
-#         self.conv2 = Conv2d(64, 128, down=True, pooling=True)
-#         self.conv3 = Conv2d(128, 256, down=True, pooling=True)
-#         self.conv4 = Conv2d(256, 512, down=True, pooling=True)
-#         self.conv5 = Conv2d(512, 1024, down=True, pooling=True)
+        ### START CODE HERE ### (approx. 12 lines)
+        self.batch_norm = torch.nn.BatchNorm2d(num_features=in_channels, eps=eps)
+        self.activation = torch.nn.ReLU()
 
-        
+        if kernel == 0:
+            self.conv1 = mm.Conv2d(in_channels, out_channels, up=up, down=down, kernel=kernel, bilinear=bilinear, pooling=pooling)
+        else:
+            self.conv1  = torch.nn.Sequential(
+                    torch.nn.Dropout(dropout),
+                    mm.Conv2d(in_channels, out_channels, kernel=3)
+                )
+
         ### END CODE HERE ###
 
     def forward(self, x):
-        return x
+        residual = x
+        x = self.batch_norm(x)
+        x = self.activation(x)
+        x = self.conv1(x)
+        print(f'x shape {x.shape}')
+        print(f'residual shape {residual.shape}')
+        if x.shape != residual.shape:
+            return x
+#             residual = torch.nn.functional.interpolate(residual, size=x.shape[2:], mode='bilinear', align_corners=True)
+        else:
+            return x + residual
 
 
