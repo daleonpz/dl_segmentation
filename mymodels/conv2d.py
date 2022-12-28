@@ -1,3 +1,4 @@
+import logging
 import torch
 
 class Conv2d(torch.nn.Module):
@@ -37,8 +38,9 @@ class Conv2d(torch.nn.Module):
             self.conv = torch.nn.Conv2d(in_channels, out_channels, kernel_size=kernel, stride=1, padding=0, bias=bias)
         ### END CODE HERE ##
         
-        print(self.conv)
-        print('----------------')
+        logging.debug(self.conv)
+        logging.debug('----------------')
+
     def forward(self, x):
         return self.conv(x)
 
