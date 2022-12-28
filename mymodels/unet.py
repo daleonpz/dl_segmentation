@@ -33,7 +33,7 @@ class UNet(torch.nn.Module):
 
         self.down_path[f'enc_{resolution}x{resolution}_in_conv'] =  Conv2d(in_channels, base_channels, kernel=kernel_size)
 
-        for i in range(len(channel_mult)):
+        for i in range(len(channel_mult)-1):
             self.down_path[f'enc_{resolution // 2**(i+1)}x{resolution // 2**(i+1)}_block{i}'] = UNetBlock(
                     base_channels * channel_mult[i], 
                     base_channels * channel_mult[i+1], 
