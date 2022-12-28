@@ -22,7 +22,7 @@ class UNetBlock(torch.nn.Module):
             torch.nn.BatchNorm2d(out_channels),
             torch.nn.ReLU(inplace=True),
             torch.nn.Dropout(dropout),
-            mm.Conv2d(out_channels, out_channels, kernel_size=3)
+            mm.Conv2d(out_channels, out_channels, kernel=3)
         )
  
         ### END CODE HERE ###
