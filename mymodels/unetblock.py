@@ -39,6 +39,6 @@ class UNetBlock(torch.nn.Module):
         logger.debug("UNetBlock: x.shape[2:]: %s, residual.shape[2:]: %s", x.shape[2:], residual.shape[2:])
 
         if residual.shape[2:] == x.shape[2:]:
-            return x + residual
+            return torch.cat((x, residual), dim=1)
         ### END CODE HERE ###
         return x 
