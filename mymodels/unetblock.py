@@ -18,7 +18,7 @@ class UNetBlock(torch.nn.Module):
         self.conv = torch.nn.Sequential(
             torch.nn.BatchNorm2d(in_channels),
             torch.nn.ReLU(inplace=True),
-            mm.Conv2d(in_channels, out_channels, up=up, down=down, bilinear=bilinear, pooling=pooling),
+            mm.Conv2d(in_channels, out_channels, kernel=kernel, up=up, down=down, bilinear=bilinear, pooling=pooling),
             torch.nn.BatchNorm2d(out_channels),
             torch.nn.ReLU(inplace=True),
             torch.nn.Dropout(dropout),
