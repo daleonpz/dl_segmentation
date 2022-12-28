@@ -35,7 +35,6 @@ class UNetBlock(torch.nn.Module):
         ## START CODE HERE ## (approx. 6 line)
         residual = x
         x = self.conv(x)
-        logger.debug("UNetBlock: current model=%s", self.conv)
         logger.debug("UNetBlock: x.shape: %s, residual.shape: %s", x.shape, residual.shape)
         logger.debug("UNetBlock: x.shape[2:]: %s, residual.shape[2:]: %s", x.shape[2:], residual.shape[2:])
 
