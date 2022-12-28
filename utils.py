@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 from tqdm import tqdm
 from torchvision import transforms as T
+from easydict import EasyDict
 
 class CityscapesDownsampled(torch.utils.data.Dataset):
     def __init__(self, img_path, label_path, transform=None, target_transform=None):
