@@ -31,9 +31,26 @@ class UNet(torch.nn.Module):
         self.down_path = torch.nn.ModuleDict()
         self.up_path = torch.nn.ModuleDict()
 
-        self.down_path[f'{base_channels}x{base_channels}_in_conv'] =  UNetBlock(in_channels, base_channels, kernel=kernel_size, dropout=0)
+        self.down_path[f'enc.{resolution}x{resolution}_in_conv'] =  Conv2d(in_channels, base_channels, kernel=kernel_size)
 
-#         for i in range(len(channel_mult)):
+        for i in range(len(channel_mult)):
+            self.down_path[f'enc.{resolution // 2**(i+1)}x{resolution // 2**(i+1)}_block{i}'] = UNetBlock(
+                    base_channels * channel_mult[i], 
+                    base_channels * channel_mult[i+1], 
+                    kernel=kernel_size, dropout=dropout, pooling=pooling)
+# 
+#         for i in range(len(channel_mult)-1):
+#             self.up_path[f'dec.{resolution // 2**(i+1)}x{resolution // 2**(i+1)}_block{i}'] = UNetBlock(
+#                     base_channels * channel_mult[i+1], 
+#                     base_channels * channel_mult[i], 
+#                     kernel=kernel_size, dropout=dropout, bilinear=bilinear)
+#     
+#         self.up_path[f'dec.{resolution}x{resolution}_out_conv'] = UNetBlock(
+#                 base_channels * channel_mult[0],
+#                 out_channels,
+#                 kernel=kernel_size, dropout=dropout, bilinear=bilinear)
+# 
+
 
         ### END CODE HERE ###
 # 
@@ -44,21 +61,21 @@ class UNet(torch.nn.Module):
 #             self.up_path.append(unetblock.UpBlock(num_filters, num_filters // 2))
 #             num_filters //= 2
 #         self.up_path.append(unetblock.UpBlock(num_filters, out_channels, use_act=False))
-
-        num_filters = base_channels
-        self.up_path[f'{num_filters}x{num_filters}_out_conv'] = torch.nn.Sequential(
-            torch.nn.BatchNorm2d(base_channels * channel_mult[-1]), 
-            torch.nn.ReLU(inplace=True),
-            Conv2d(base_channels * channel_mult[-1], out_channels, kernel=3)
-            )
+# 
+#         num_filters = base_channels
+#         self.up_path[f'{num_filters}x{num_filters}_out_conv'] = torch.nn.Sequential(
+#             torch.nn.BatchNorm2d(base_channels * channel_mult[-1]), 
+#             torch.nn.ReLU(inplace=True),
+#             Conv2d(base_channels * channel_mult[-1], out_channels, kernel=3)
+#             )
 
     def forward(self, x):
 		### START CODE HERE ### (approx. 4 lines)
 
 		### END CODE HERE ###
 #         blocks = []
-#         for down in self.down_path:
-#             x = down(x)
+        for down in self.down_path:
+            x = down(x)
 #             blocks.append(x)
 #         blocks = blocks[:-1]
 #         blocks.reverse()
