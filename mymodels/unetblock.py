@@ -30,13 +30,12 @@ class UNetBlock(torch.nn.Module):
  
         ### END CODE HERE ###
 
-        logger.debug("UNetBlock: model=%s", self.conv)
 
     def forward(self, x):
         ## START CODE HERE ## (approx. 6 line)
         residual = x
         x = self.conv(x)
-
+        logger.debug("UNetBlock: current model=%s", self.conv)
         logger.debug("UNetBlock: x.shape: %s, residual.shape: %s", x.shape, residual.shape)
         if residual.shape == x.shape:
             return x + residual
