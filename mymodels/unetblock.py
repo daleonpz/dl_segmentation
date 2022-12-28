@@ -1,5 +1,6 @@
 import torch
-import mymodels.conv2d as mm 
+
+import conv2d as mm 
 
 class UNetBlock(torch.nn.Module):
     def __init__(self, in_channels, out_channels, kernel=0, up=False, down=False,
