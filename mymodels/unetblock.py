@@ -15,33 +15,24 @@ class UNetBlock(torch.nn.Module):
         """
         super().__init__()
         ### START CODE HERE ### (approx. 12 lines)
-        self.batch_norm = torch.nn.BatchNorm2d(num_features=in_channels, eps=eps)
-        self.activation = torch.nn.ReLU()
-
-        if kernel == 0:
-            self.conv1 = mm.Conv2d(in_channels, out_channels, up=up, down=down, kernel=kernel, bilinear=bilinear, pooling=pooling)
-        else:
-            self.conv1  = torch.nn.Sequential(
-                    torch.nn.Dropout(dropout),
-                    mm.Conv2d(in_channels, out_channels, kernel=3)
-                )
-
+        self.conv = torch.nn.Sequential(
+            torch.nn.BatchNorm2d(in_channels),
+            torch.nn.ReLU(inplace=True),
+            mm.Conv2d(in_channels, out_channels, up=up, down=down, bilinear=bilinear, pooling=pooling),
+            torch.nn.BatchNorm2d(out_channels),
+            torch.nn.ReLU(inplace=True),
+            torch.nn.Dropout(dropout),
+            mm.Conv2d(out_channels, out_channels, kernel_size=3)
+        )
+ 
         ### END CODE HERE ###
-
     def forward(self, x):
-        ### START CODE HERE ### (approx. 6 lines)
+        ## START CODE HERE ## (approx. 6 line)
         residual = x
-        x = self.batch_norm(x)
-        x = self.activation(x)
-        y = self.conv1(x)
+        x = self.conv(x)
         print(f'x shape {x.shape}')
-        print(f'y shape {y.shape}')
         print(f'residual shape {residual.shape}')
-#         if x.shape == residual.shape:
-        if x.shape == y.shape:
-            x = y + residual
-#             residual = torch.nn.functional.interpolate(residual, size=x.shape[2:], mode='bilinear', align_corners=True)
+        if residual.shape == x.shape:
+            return x + residual
         ### END CODE HERE ###
-        return y
-
-
+        return x 
