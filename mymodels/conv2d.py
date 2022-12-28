@@ -38,7 +38,7 @@ class Conv2d(torch.nn.Module):
                 self.conv = torch.nn.ConvTranspose2d(in_channels, out_channels, kernel_size=2, stride=2, padding=0, bias=bias)
         else:
             padding = (kernel-1)//2
-            self.conv = torch.nn.Conv2d(in_channels, out_channels, kernel_size=kernel, stride=1, padding=pading, bias=bias)
+            self.conv = torch.nn.Conv2d(in_channels, out_channels, kernel_size=kernel, stride=1, padding=padding, bias=bias)
         ### END CODE HERE ##
         
         logger.debug(self.conv)
