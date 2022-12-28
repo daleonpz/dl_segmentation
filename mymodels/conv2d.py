@@ -19,11 +19,12 @@ class Conv2d(torch.nn.Module):
         ### START CODE HERE ### (approx. 23 lines)
         if down==True:
             if pooling==True:
-                kernel_size, padding = 3, 1
+                self.conv = torch.nn.Sequential(
+                    torch.nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=bias),
+                    torch.nn.MaxPool2d(kernel_size=2, stride=2)
+                    )
             else:
-                kernel_size, padding = 2, 0
-
-            self.conv = torch.nn.Conv2d(in_channels, out_channels, kernel_size=kernel_size, stride=1, padding=padding, bias=bias)
+                self.conv = torch.nn.Conv2d(in_channels, out_channels, kernel_size=2, stride=1, padding=0, bias=bias)
         elif up==True:
             if bilinear==True:
                 self.conv = torch.nn.Sequential(

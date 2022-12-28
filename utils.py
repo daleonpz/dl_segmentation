@@ -134,94 +134,6 @@ class CityscapesSubset(CityscapesDownsampled):
         
         return img, seg
 
-
-def validate(model, val_loader, device, criterion, metric):
-    model.eval()
-    loss_step, miou_step = [], []
-    
-    with torch.no_grad():
-        for inp_data, labels in val_loader:
-            labels = labels.to(device)
-            inp_data = inp_data.to(device)
-            outputs = model(inp_data)
-            val_loss = criterion(outputs, labels)
-            miou_step.append(metric(outputs, labels).item())
-            loss_step.append(val_loss.item())
-        
-        val_loss_epoch = np.mean(loss_step)
-        val_mIoU = np.mean(miou_step)*100
-        return val_loss_epoch, val_mIoU
-
-def train_one_epoch(model, optimizer, train_loader, device, criterion, metric):
-    model.train()
-    loss_step, miou_step = [], []
-    for (inp_data, labels) in train_loader:
-        labels = labels.to(device)
-        inp_data = inp_data.to(device)
-        outputs = model(inp_data)
-        loss = criterion(outputs, labels)
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-
-        with torch.no_grad():
-            miou_step.append(metric(outputs, labels).item())
-            loss_step.append(loss.item())
-    
-    loss_curr_epoch = np.mean(loss_step)
-    train_mIoU = np.mean(miou_step)*100
-    return loss_curr_epoch, train_mIoU
-
-
-def train(model, optimizer, num_epochs, train_loader, val_loader, device, criterion, metric, exp_name='unet', viz=False, viz_freq=20):
-    best_val_metric = -1
-    model = model.to(device)
-    dict_log = {"train_mIoU":[], "val_mIoU":[], "train_loss":[], "val_loss":[]}
-    pbar = tqdm(range(num_epochs))
-    for epoch in pbar:
-        train_loss, train_metric = train_one_epoch(model, optimizer, train_loader, device, criterion, metric)
-        val_loss, val_metric,  = validate(model, val_loader, device, criterion, metric)
-        msg = (f'Ep {epoch}/{num_epochs}: mIoU : Train:{train_metric:.3f} \t Val:{val_metric:.2f}\
-                || Loss: Train {train_loss:.3f} \t Val {val_loss:.3f}')
-        
-        pbar.set_description(msg)
-
-        dict_log["train_mIoU"].append(train_metric)
-        dict_log["val_mIoU"].append(val_metric)
-        dict_log["train_loss"].append(train_loss)
-        dict_log["val_loss"].append(val_loss)
-
-        if val_metric > best_val_metric:
-            best_val_metric = val_metric
-            torch.save({
-                  'epoch': epoch,
-                  'model_state_dict': model.state_dict(),
-                  'optimizer_state_dict': optimizer.state_dict(),
-                  'loss': val_loss,
-                  'mIoU':val_metric,
-                  }, f'{exp_name}_best_model_min_val_loss.pth')
-        if viz and (epoch+1)%viz_freq==0:
-            show_preds(model, train_loader, device, num_samples=1)
-     
-    return dict_log
-
-def show_preds(model, loader, device, ignore_index=250, num_samples=1 ):
-    model.eval()
-    model = model.to(device)
-    imgs, segs = next(iter(loader))
-    preds = model(imgs.to(device))
-    num_samples = min(num_samples, int(imgs.shape[0]))
-    for img_id in range(num_samples):
-        pred = preds.argmax(dim=1)[img_id,...].cpu()
-        img, seg = imgs[img_id,...], segs[img_id,...]
-        pred[seg==ignore_index] = ignore_index
-        if hasattr(loader.dataset, 'plot_triplet'):
-            loader.dataset.plot_triplet(img, seg, pred)
-        elif hasattr(loader.dataset.dataset, 'plplot_tripletot'):
-            loader.dataset.dataset.plot_triplet(img, seg, pred)
-        else:
-            raise NotImplementedError("Dataset does not have plot_triplet method")
-
 def load_model(model, path):
     checkpoint = torch.load(path)
     model.load_state_dict(checkpoint['model_state_dict'])
@@ -262,6 +174,76 @@ def plot_stats(dict_log, modelname="",baseline=None, title=None, scale_metric=10
     plt.xlabel('Number of Epochs')
     plt.title("Loss over epochs", fontsize=fontsize)
     plt.legend(fontsize=fontsize, loc='upper right')
-    if title is not None:
-        plt.savefig(title, bbox_inches='tight', dpi=400)
+
+
+def print_module_summary(module, inputs, max_nesting=3, skip_redundant=True, **kwargs):
+    assert isinstance(module, torch.nn.Module)
+    assert not isinstance(module, torch.jit.ScriptModule)
+    assert isinstance(inputs, (tuple, list))
+
+    # Register hooks.
+    entries = []
+    nesting = [0]
+    def pre_hook(_mod, _inputs):
+        nesting[0] += 1
+    def post_hook(mod, _inputs, outputs):
+        nesting[0] -= 1
+        if nesting[0] <= max_nesting:
+            outputs = list(outputs) if isinstance(outputs, (tuple, list)) else [outputs]
+            outputs = [t for t in outputs if isinstance(t, torch.Tensor)]
+            entries.append(EasyDict(mod=mod, outputs=outputs))
+    hooks = [mod.register_forward_pre_hook(pre_hook) for mod in module.modules()]
+    hooks += [mod.register_forward_hook(post_hook) for mod in module.modules()]
+
+    # Run module.
+    outputs = module(*inputs, **kwargs)
+    for hook in hooks:
+        hook.remove()
+
+    # Identify unique outputs, parameters, and buffers.
+    tensors_seen = set()
+    for e in entries:
+        e.unique_params = [t for t in e.mod.parameters() if id(t) not in tensors_seen]
+        e.unique_buffers = [t for t in e.mod.buffers() if id(t) not in tensors_seen]
+        e.unique_outputs = [t for t in e.outputs if id(t) not in tensors_seen]
+        tensors_seen |= {id(t) for t in e.unique_params + e.unique_buffers + e.unique_outputs}
+
+    # Filter out redundant entries.
+    if skip_redundant:
+        entries = [e for e in entries if len(e.unique_params) or len(e.unique_buffers) or len(e.unique_outputs)]
+
+    # Construct table.
+    rows = [[type(module).__name__, 'Parameters', 'Buffers', 'Output shape', 'Datatype']]
+    rows += [['---'] * len(rows[0])]
+    param_total = 0
+    buffer_total = 0
+    submodule_names = {mod: name for name, mod in module.named_modules()}
+    for e in entries:
+        name = '<top-level>' if e.mod is module else submodule_names[e.mod]
+        param_size = sum(t.numel() for t in e.unique_params)
+        buffer_size = sum(t.numel() for t in e.unique_buffers)
+        output_shapes = [str(list(t.shape)) for t in e.outputs]
+        output_dtypes = [str(t.dtype).split('.')[-1] for t in e.outputs]
+        rows += [[
+            name + (':0' if len(e.outputs) >= 2 else ''),
+            f'{param_size:,}' if param_size else '-',
+            str(buffer_size) if buffer_size else '-',
+            (output_shapes + ['-'])[0],
+            (output_dtypes + ['-'])[0],
+        ]]
+        for idx in range(1, len(e.outputs)):
+            rows += [[name + f':{idx}', '-', '-', output_shapes[idx], output_dtypes[idx]]]
+        param_total += param_size
+        buffer_total += buffer_size
+    rows += [['---'] * len(rows[0])]
+    rows += [['Total', f'{param_total:,}', str(buffer_total), '-', '-']]
+
+    # Print table.
+    widths = [max(len(cell) for cell in column) for column in zip(*rows)]
+    print()
+    for row in rows:
+        print('  '.join(cell + ' ' * (width - len(cell)) for cell, width in zip(row, widths)))
+    print()
+    return outputs
+
 
