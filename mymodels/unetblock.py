@@ -13,6 +13,7 @@ class UNetBlock(torch.nn.Module):
             up/down:            Whether the first convolution is in up- or down-sampling mode.
             dropout:            Dropout probability for dropout before the second conv.
         """
+        super().__init__()
         ### START CODE HERE ### (approx. 12 lines)
         self.batch_norm = torch.nn.BatchNorm2d(num_features=in_channels, eps=eps)
         self.activation = torch.nn.ReLU()
