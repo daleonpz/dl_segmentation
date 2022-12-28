@@ -2,6 +2,7 @@ import logging
 import torch
 
 from mymodels.unetblock import UNetBlock
+from mymodels.conv2d    import Conv2d
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +49,7 @@ class UNet(torch.nn.Module):
         self.up_path[f'{num_filters}x{num_filters}_out_conv'] = torch.nn.Sequential(
             torch.nn.BatchNorm2d(base_channels * channel_mult[-1]), 
             torch.nn.ReLU(inplace=True),
-            torch.nn.Conv2d(base_channels * channel_mult[-1], out_channels, kernel=3)
+            Conv2d(base_channels * channel_mult[-1], out_channels, kernel=3)
             )
 
     def forward(self, x):
