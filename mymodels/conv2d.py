@@ -28,7 +28,7 @@ class Conv2d(torch.nn.Module):
                     torch.nn.MaxPool2d(kernel_size=2, stride=2)
                     )
             else:
-                self.conv = torch.nn.Conv2d(in_channels, out_channels, kernel_size=2, stride=1, padding=0, bias=bias)
+                self.conv = torch.nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=bias)
         elif up==True:
             if bilinear==True:
                 self.conv = torch.nn.Sequential(
