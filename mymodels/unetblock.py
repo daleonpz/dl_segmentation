@@ -29,16 +29,19 @@ class UNetBlock(torch.nn.Module):
         ### END CODE HERE ###
 
     def forward(self, x):
+        ### START CODE HERE ### (approx. 6 lines)
         residual = x
         x = self.batch_norm(x)
         x = self.activation(x)
-        x = self.conv1(x)
+        y = self.conv1(x)
         print(f'x shape {x.shape}')
+        print(f'y shape {y.shape}')
         print(f'residual shape {residual.shape}')
-        if x.shape != residual.shape:
-            return x
+#         if x.shape == residual.shape:
+        if x.shape == y.shape:
+            x = y + residual
 #             residual = torch.nn.functional.interpolate(residual, size=x.shape[2:], mode='bilinear', align_corners=True)
-        else:
-            return x + residual
+        ### END CODE HERE ###
+        return y
 
 
