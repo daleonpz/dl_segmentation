@@ -1,6 +1,9 @@
+import logging
 import torch
 
-from mymodule.unetblock import UNetBlock
+from mymodels.unetblock import UNetBlock
+
+logger = logging.getLogger(__name__)
 
 class UNet(torch.nn.Module):
     """
