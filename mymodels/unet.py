@@ -74,7 +74,7 @@ class UNet(torch.nn.Module):
 
 		### END CODE HERE ###
 #         blocks = []
-        for down in self.down_path:
+        for down in self.down_path.values():
             x = down(x)
 #             blocks.append(x)
 #         blocks = blocks[:-1]
