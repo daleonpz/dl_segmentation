@@ -1,6 +1,8 @@
 import logging
 import torch
 
+logger = logging.getLogger(__name__)
+
 class Conv2d(torch.nn.Module):
     def __init__(self, in_channels, out_channels, kernel=0, bias=True,
                     up=False, down=False, bilinear=False, pooling=False):
@@ -38,8 +40,8 @@ class Conv2d(torch.nn.Module):
             self.conv = torch.nn.Conv2d(in_channels, out_channels, kernel_size=kernel, stride=1, padding=0, bias=bias)
         ### END CODE HERE ##
         
-        logging.debug(self.conv)
-        logging.debug('----------------')
+        logger.debug(self.conv)
+        logger.debug('----------------')
 
     def forward(self, x):
         return self.conv(x)
