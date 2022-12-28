@@ -45,7 +45,7 @@ class UNet(torch.nn.Module):
 #             num_filters //= 2
 #         self.up_path.append(unetblock.UpBlock(num_filters, out_channels, use_act=False))
 
-
+        num_filters = base_channels
         self.up_path[f'{num_filters}x{num_filters}_out_conv'] = torch.nn.Sequential(
             torch.nn.BatchNorm2d(base_channels * channel_mult[-1]), 
             torch.nn.ReLU(inplace=True),
