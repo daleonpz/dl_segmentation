@@ -102,7 +102,7 @@ class CityscapesDownsampled(torch.utils.data.Dataset):
         mean of 0 and variance of 1 will show the images unchanged in the screen
         """
         unnormalize = T.Normalize((-mean / std).tolist(), (1.0 / std).tolist())
-        npimg = unnormalize(img).numpy()
+        npimg = unnormalize(img).cpu().numpy()
         plt.imshow(np.transpose(npimg, (1, 2, 0)))
 
     def __getitem__(self, index):
