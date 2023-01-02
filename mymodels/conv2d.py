@@ -21,7 +21,9 @@ class Conv2d(torch.nn.Module):
         assert (kernel or up or down), 'Must use kernel or up or down sampling'
 
         ### START CODE HERE ### (approx. 23 lines)
-        if down==True:
+        if kernel > 0:
+            self.conv = torch.nn.Conv2d(in_channels, out_channels, kernel, padding=kernel//2, bias=bias)
+        elif  down==True:
             if pooling==True:
                 self.conv = torch.nn.Sequential(
                     torch.nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=bias),
@@ -37,9 +39,12 @@ class Conv2d(torch.nn.Module):
                     )
             else:
                 self.conv = torch.nn.ConvTranspose2d(in_channels, out_channels, kernel_size=2, stride=2, padding=0, bias=bias)
+
         else:
-            padding = (kernel-1)//2
-            self.conv = torch.nn.Conv2d(in_channels, out_channels, kernel_size=kernel, stride=1, padding=padding, bias=bias)
+            raise ValueError('Invalid combination of parameters')
+#         else:
+#             padding = (kernel-1)//2
+#             self.conv = torch.nn.Conv2d(in_channels, out_channels, kernel_size=kernel, stride=1, padding=padding, bias=bias)
         ### END CODE HERE ##
         
         logger.debug(self.conv)
