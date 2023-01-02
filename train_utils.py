@@ -5,8 +5,6 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data as data
 import torchvision
-import medmnist
-from medmnist import INFO, Evaluator
 import torch
 from torchvision import transforms as T
 import torchvision.transforms.functional as TF
@@ -72,7 +70,7 @@ def show_preds(model, loader, device, ignore_index=250, num_samples=1):
     ### END CODE HERE ###
     # Visualizes the three arguments in a plot
     loader.dataset.plot_triplet(img, seg, pred)
-            
+
 def train(model, optimizer, num_epochs, train_loader, val_loader, device, criterion, metric, exp_name='unet', viz=False, viz_freq=20):
     best_val_metric = -1
     model = model.to(device)
