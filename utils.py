@@ -117,13 +117,10 @@ class CityscapesDownsampled(torch.utils.data.Dataset):
         return img, seg
     
 
-# class CityscapesSubset(CityscapesDownsampled):
-class CityscapesSubset(torch.utils.data.Dataset):
+class CityscapesSubset(CityscapesDownsampled):
     def __init__(self, dataset, indices, **params):
-#         super().__init__(**params)
+        super().__init__(**params)
         self.train_dataset_test = torch.utils.data.Subset(dataset, indices)
-
-
     def __len__(self):
         return len(self.train_dataset_test)
     
