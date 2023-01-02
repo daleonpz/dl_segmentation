@@ -1,8 +1,12 @@
 ## create a unet model in pytorch
 
+import logging 
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
+logger = logging.getLogger(__name__)
 
 class UNet(nn.Module):
     def __init__(self, n_channels, n_classes):
@@ -97,16 +101,21 @@ class double_conv(nn.Module):
         super(double_conv, self).__init__()
         self.conv = nn.Sequential(
             nn.Conv2d(in_ch, out_ch, 3, padding=1),
-            nn.BatchNorm2d(out_ch),
-            nn.ReLU(inplace=True),
+#             nn.BatchNorm2d(out_ch),
+#             nn.ReLU(inplace=True),
             nn.Conv2d(out_ch, out_ch, 3, padding=1),
-            nn.BatchNorm2d(out_ch),
-            nn.ReLU(inplace=True)
+#             nn.BatchNorm2d(out_ch),
+#             nn.ReLU(inplace=True)
         )
 
     def forward(self, x):
         x = self.conv(x)
         return x
+
+## print number of parameters in the model
+def count_parameters(model):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
 
 if __name__ == '__main__':
     model = UNet(n_channels=3, n_classes=1)
