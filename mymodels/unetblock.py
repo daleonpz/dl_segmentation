@@ -18,7 +18,7 @@ class UNetBlock(torch.nn.Module):
         """
         super().__init__()
         ### START CODE HERE ### (approx. 12 lines)
-        self.batchRelu = torch.nn.Sequential(
+        self.conv = torch.nn.Sequential(
             torch.nn.BatchNorm2d(in_channels, eps=eps),
             torch.nn.ReLU(inplace=True),
             torch.nn.Dropout2d(dropout),
